@@ -1,8 +1,8 @@
 import numpy as np
 import librosa
-import os
 
 
+sr = 16000
 n_fft = 1024
 n_frame = 40
 hope_size = 512
@@ -71,11 +71,12 @@ def next_pow_two(n):
 if __name__ == '__main__':
   indices = np.tile(np.arange(0, n_fft), (n_frame, 1)) + np.tile(np.arange(0, n_frame * hope_size, hope_size), (n_fft, 1)).T
 
-  y, sr = librosa.load(input_wav, 16000)
-  y = librosa.util.fix_length(y, 20480 + 512)
+  y, sr = librosa.load(input_wav, sr)
+  padding = hope_size - ((len(y) - n_fft) % hope_size)
+  y = librosa.util.fix_length(y, len(y) + padding)
 
   frames = y[indices.astype(np.int32, copy=False)]
-  frames *= np.hamming(1024)
+  frames *= np.hamming(n_fft)
 
   result = []
 
